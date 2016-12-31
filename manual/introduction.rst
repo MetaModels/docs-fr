@@ -40,11 +40,11 @@ Les masques de saisie permettent de définir précisément quelle donnée peut (
 
 Avant de débuter un nouveau projet, vous pouvez vous demander s'il vaut mieux développer votre propre extension ou utiliser MetaModels. IL n'y a pas de réponse générale à cette question parce que les deux solutions permettent de résoudre différents problèmes. Ces différents aspects peuvent vous aider à prendre votre décision :
 
-** Pour développer votre propre extension : **
+**Pour développer votre propre extension:**
 Le produit à développer doit pouvoir être commercialisé, par exemple une extension commerciale qui devra être facilement mise à disposition des autres utilisateurs de Contao ?
 Envisagez de développer votre propre extension. Vous devrez basiquement avoir des compétences en programmation PHP et connaitre de l'API Contao.
 
-** Pour MetaModels : **
+**Pour MetaModels:**
 MetaModels est certainement un bon choix lorsque vous souhaitez créer une solution spécifique facilement personnalisable dans le backend de Contao. MetaModels a également des atouts à faire valoir  s'il vous faut des fonctions spécifiques comme le multilinguisme. MetaModels permet à l'utilisateur de développer des solution sans programmation. Cependant, des connaissances basiques en PHP, HTML et les bases SQL vous permettront d'utiliser à plein les possibilités offertes par MetaModels.
 
 Ressources
