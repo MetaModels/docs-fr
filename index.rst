@@ -1,7 +1,7 @@
 Bienvenue à MetaModels !
 ========================
 
-Ceci est la documentation officielle de *MetaModels*, une extension pour le `CMS Contao`_.
+Ceci est la documentation officielle de *MetaModels*, une extension pour le `Contao Content Management System`_.
 
 .. _Contao Content Management System: https://contao.org
 
@@ -17,7 +17,7 @@ Cette documentation est divisée en 3 sections :
 Si vous souhaitez également contribuer, merci de cliquer sur le lien „Edit on GitHub“ dans le coin supérieur droit ou de visiter la
 `page du projet sur GitHub`_.
 
-.. _GitHub project page: https://github.com/MetaModels/docs
+.. _page du projet sur GitHub: https://github.com/MetaModels/docs
 
 .. _manual:
 
