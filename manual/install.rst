@@ -1,9 +1,9 @@
 .. _manual_install:
 
 Installation et mise à jour de MetaModels
-==============================
+=========================================
 
-MetaModels ne doit être installé que sur une version LTS (long time support) de Contao :
+MetaModels doit être installé sur une version LTS (long time support) de Contao :
 - la version actuelle est Contao 3.5.x
 
 
