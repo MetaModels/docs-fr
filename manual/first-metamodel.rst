@@ -1,15 +1,20 @@
 The first MetaModel
-===================
+Votre premier MetaModel
+=======================
 
 Install with composer
----------------------
+Installation via Composer
+-------------------------
 
-You’ll need the MetaModels core and some attributes / filter to get MetaModels running. In you composer search
-``metamodels/core`` an ``metamodels/bundle_all`` to install the core and all bundles and filters. 
+You’ll need the MetaModels core and some attributes / filter to get MetaModels running. In you composer search ``metamodels/core`` and ``metamodels/bundle_all`` to install the core and all bundles and filters.
+Pour être fonctionnel, MetaModels nécessite le paquet principal (core) et des attributs et filtres. Dans Composer, recherchez ``metamodels/core`` et ``metamodels/bundle_all`` pour sélectionner le cœur et tous les paquets et filtres.
 Don’t forget to run composer install through „Update packages“.
+Lancez ensuite l'installation en cliquant syr „Mettre à jour les paquets“.
 When installed, run the database update and your MetaModels installation is done.
+Enfin, lancez la mise à jour de la base de données et votre installation de MetaModels est terminée.
 
 .. note:: If you know that you don’t need all attributes and/or filter you can install every single package by it’s own.
+.. à noter:: si vous n'avez pas besoin de tousles attributs et/ou filtres, vous pouvez n'installer que ceux souhaités un à un.
 
 Create MetaModels
 -----------------
@@ -134,9 +139,9 @@ Early, we introduced in our „reference“ MetaModel a select attribute but lea
 The real power of MetaModel now gets obvious here. With a simple select attribute you can easily connect MetaModels
 (or any other sql-table) and optional filter the objects. Filter...? We'll talk about this later.
 
-Edit the „multi select“ attribute in your „References“. 
+Edit the „multi select“ attribute in your „References“.
 
-Choose: 
+Choose:
 
 :table: mm_category
 :Name: name - text
@@ -179,7 +184,7 @@ The jump-to-page comes into the game when we like to display our references as l
 So you need to define a jump-to-page where the user gets redirected if he clicks on a „detail“ link of one of our
 reference objects.
 
-The filter setting define the rules for the target, your detail page. 
+The filter setting define the rules for the target, your detail page.
 
 .. info:: In list views, you need to set a filter (which includes the conditions of your detail page)
 
@@ -194,7 +199,7 @@ Create a rendersetting (backend)
 Go to the „render settings“ of „reference“.
 
 * Create a render setting called „BE: references“
-* Add „all attributes“ 
+* Add „all attributes“
 * After adding, activate „name“ and „category“
 
 .. note:: When you (later) add attributes to your MetaModel you need to add them also in your render setting.*
@@ -205,7 +210,7 @@ Create a rendersetting (frontend list)
 Go to the „render settings“ of „reference“.
 
 * Create a render setting called „FE: references list“
-* Add „all attributes“ 
+* Add „all attributes“
 * After adding, activate „name“, „category“, „picture_highlight“
 
 Create a rendersetting (frontend detail)
@@ -214,7 +219,7 @@ Create a rendersetting (frontend detail)
 Go to the „render settings“ of „reference“.
 
 * Create a render setting called „FE: reference detail“
-* Add „all attributes“ 
+* Add „all attributes“
 * After adding, activate „name“, „description“, „category“, „picture_highlight“, „picture_gallery“
 
 Input Screens
@@ -255,7 +260,7 @@ Define Attribute settings
 Our input screen is ready. But we need tweak the attributes a little bit. For example we always want a name, description
 and Highlight Picture.
 
-To get this done, we choose in these attribute settings the „mandatory“. 
+To get this done, we choose in these attribute settings the „mandatory“.
 
 .. info:: Input Screens are very powerful. Take a coffee and explore the visibility conditions and attribute settings.
 

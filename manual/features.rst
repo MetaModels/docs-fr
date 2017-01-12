@@ -60,6 +60,6 @@ Parmi les fonctions à venir :
 * Types de sorties avancés comme les RSS et les autres systèmes de syndications, XML, CSV
 * Fonctions d'import-export
 * Édition en front-end
-# une API pour le module de commerce en ligne 'Isotope'
+* une API pour le module de commerce en ligne 'Isotope'
 
 Par votre soutien financier ou des développement sur commande, vous nous permettez d'ajouter rapidement de nouvelles fonctions. - Plus d'informations sur le site du projet :  <https://now.metamodel.me>`_.
