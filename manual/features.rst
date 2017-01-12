@@ -1,68 +1,65 @@
 ﻿.. _rst_features:
 
-Function overview
-==================
+Aperçu des fonctions
+====================
 
-Data models
------------
+Modèles de données
+------------------
 
-MetaModels allow you to easily define data models in the Contao backend with (almost) no restrictions and without programming skills.
+Metamodels vous permet de concevoir des modèles de données facilement depuis le backend de Contao sans (presque) aucune restriction et sans compétence en programmation.
 
-There are different data types availablefor the data fields (attributes), as for example text, picture, numbers, date and files. 
-If you reach a limit and a desired data type is not available to you, an implementation is still possible.
+Différents types de données sont disponibles pour les champs (attributs) comme, par exemple, texte, image, nombres, date et fichiers.
+Si vous atteignez une limite et que le type de donnée souhaité n'est pas disponible, il est aussi possible de l'implémenter.
 
-Created tables can be linked together with relations (1:n, m:n). It is also possible to connect the tables with tables in the Contao core, to establish "parent-child-connections" or to implement variant inputs.
+Les tables créées peuvent être liées par des relations 1 à n ou n à n. Il est aussi possible de connecter des tables aux tables de Contao pour établir des connexion "parent-enfant" ou implémenter des entrées de variantes.
 
-Input mask
-----------
+Masques de saisie
+-----------------
 
-You can define complex input masks for the backend, which enable you to provide the Contao backend "look-and-feel" to the editors, which they are alraedy familiar with. Within an entry mask you are able to respond to the input of values or checkboxes to optionally show different sub-palettes.
+Vous concevez des masques de saisie complexes pour le backend vous permettant d'offrir aux éditeurs le "look-and-feel" du backend de Contao auquel ils sont déjà habitués. Au sein d'un masque, vous pouvez faire afficher ou non certains éléments ("sub-palettes") en fonction de valeurs saisies ou de cases à cocher.
 
-It is possible to extend the view with different filters, search- and grouping functions for an easy orientation in the data.
+Il est possible de compléter les vues par des filtres, des champs de recherche et des fonctions de regroupement pour une meilleure présentation des données.
 
-The flexible user rights system, which has been developed for MetaModels, allows you to define different backend views for both editor and administrator user groups.
+Le système de droits utilisateurs flexible développé pour MetaModels vous permet de définir des vues backend différentes pour différents groupes d'éditeurs et d'administrateurs.
 
-The backend can be customized in such a way, that only specified user groups are allowed to access particular input fields. Additionally you can customize the order of those input fields individually for each user group.
+Le backend peut-être personnalisé au point de restreindre l'accès de certains champs à certains groupes d'utilisateurs. Vous pouvez également personnaliser l'ordre des champs par groupe d'utilisateur.
 
-Multilingualism
-----------------
+Multilinguisme
+--------------
 
-From the beginning, MetaModels have been developed with the claim for multilingualism.
-Therefore attributes are able to support translations of the data which is stored within them in multiple languages.
-The language changer in the backend enables you to just switch to the desired language and immediately be able to edit the data set.
+Dès le départ, MetaModels a été pensé pour être multilangue. Les attributs supportent donc nativement la traduction des données qui sont directement stockées dans chaque langue.
+Sélectionnez le langage voulu dans les réglages du backend et vous pouvez modifier les données.
 
-Best of all, untranslatable attributes are not going to be translated. This allows you e.g. to only make the product names and descriptions translatable, but not the EAN-Code and the measurements.
+Encore mieux : les champs qui n'ont pas à être traduits ne le seront pas ! Vous pouvez donc rendre traduisibles le nom et la description du produit mais pas le code EAN ni les dimensions.
 
 Filters
+Filtres
 -------
 
-MetaModels has a powerful filter concept, which enables you to realize complex tasks. The website administrator can adapt the filter interactions completely to their requirements. This can be achieved by configuration and combination of filter settings and their parameters.
+MetaModels propose un système de filtres très puissant qui permet de réaliser des tâches complexes. L'administrateur du site peut adapter les interactions des filtres selon les besoins. Ceci en configurant et paramétrant les filtres et leurs données.
 
-MetaModels doesn't limit filter combinations and masters very complex filter scenarios. Thanks to the open structure of the API, you are able to easily program your own filters.
+MetaModels n'impose aucune limite aux combinaisons de filtres possibles permettant des scénarions de filtrage complexes. Et grâce à la structure ouverte de l'API, vous pouvez-même facilement programmer vos propres filtres.
 
-MetaModels is delivered with various filter settings, to generate filter input fields in the frontend, such as select boxes, range filters, free text search etc.
-If you combine this filters with filter settings such as AND/OR-conditions or individual SQL-queries, complex and interactive filters can be set up.
+MetaModels est fourni avec de nombreux réglages de filtres pour afficher en frontend des champs de saisie de filtrage comme menu de sélection, écarts, recherche en texte libre etc. Vous pouvez combiner ces filtres avec des conditions type ET/OU ou des requêtes SQL personnalisées pour obtenir des filtres complexes et interactifs.
 
+Vues dynamiques
+---------------
 
-Dynamic views
--------------
+Dans MetaModels, le concept de template "partiel" utilisé par Contao a été amélioré par l'utilisation des réglages de sortie. L'utilisateur peut personnaliser chaque aspect d'une vue depuis le niveau d'un enregistrement à celui d'un attribut.
 
-In MetaModels, the "partial"-template concept which is used in Contao, was implemented in an extended way with the help of the output settings. The user is enabled to customize every aspect of the views at attributes and data records level.
+De nombreux réglages globaux sont gérés directement depuis le backend. Mais ils peuvent être écrasés, modifiés ou ignorés à l'aide de templates personnalisés au niveau des enregistrements comme des champs de données (attributs).
 
-A lot of general settings can be specified in the backend configuration.
-But they can also be overwritten, tweaked or completely ignored, by specifying a an own template at attributes and data records level. This output settings provide a flexible way to define "data views".
+Les concepteurs peuvent créer une vue (totalement) différente pour chaque usage, que ce soit une simple liste, une accroche pour la page d'accueil ou la vue de détail d'un ensemble de données. Ils peuvent définir où et quand cette vue doit être utilisée.
 
-Designers can define a completely different view for each purpose, whether it's a simple list, a teaser for the homepage or a detail view of a data set. They can specify when and where this view should be used as well.
+Coup d'œil
+----------
 
-Outlook
--------
+Nous travaillons continuellement pour améliorer les fonctionnalités de MetaModels.
+Parmi les fonctions à venir :
 
-We are working on Metamodels to continuously improve functionality.
-Further planned features:
+* Types de sorties avancés comme les RSS et les autres systèmes de syndications, XML, CSV
+* Fonctions d'import-export
+* Édition en front-end
+* une API pour le module de commerce en ligne 'Isotope'
 
-* Extended outputs such as RSS-feeds and other syndications forms, XML, CSV
-* Export/Import functions
-* Front-End-Editing
-* API for the onlineshop modul 'Isotope'
-
-Financial support or ordered programming work will allow us to rapidly implement additional functionality   - Further informations are available on the project website: <https://now.metamodel.me>`_.
+Par votre soutien financier ou des développement sur commande, vous nous permettez d'ajouter rapidement de nouvelles fonctions. - Plus d'informations sur le site du projet :  <https://now.metamodel.me>`_.
