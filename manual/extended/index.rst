@@ -26,6 +26,9 @@ se trouvent sur `Github <https://github.com/MetaModels>`_.
     metadata_extractor
     xliff_ex-import
     translator-bridge
+    changelanguage-bridge
+    erd-viewer
+    health-check
 
 
 autres extensions connues

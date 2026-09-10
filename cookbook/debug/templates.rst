@@ -94,6 +94,11 @@ débogage - par ex.
       debug:
           dump_destination: "%kernel.logs_dir%/dump.log"
 
+.. note:: En mode debug, un commentaire de début et de fin ainsi que le nom du template sont affichés dans le
+   code source pour les templates html5 du frontend - cela permet de voir quel template affiche quoi où. Pour
+   les templates Twig, ces informations sont également disponibles avec l'extension `contao-twig-debug-marker-bundle
+   <https://github.com/e-spin/contao-twig-debug-marker-bundle>`_.
+
 
 Débogage dans MM 2.0
 ---------------------

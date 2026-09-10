@@ -21,11 +21,15 @@ Les principales nouvelles fonctionnalités sont :
 - prise en charge des **templates Twig** en complément des templates ``.html5`` existants
 - **nouvelles icônes SVG** pour le backend
 - plus de MooTools
-- sections de backend personnalisées par configuration
+- **sections de backend personnalisées par configuration**
 - **fil d'Ariane pour les tables enfants**
 - templates d'attributs avec sortie du label associé à la valeur
 - nouvel **attribut pour les valeurs Lat/Long**
 - **variantes avec pagination**
+- enregistrements MetaModels trouvables dans la **recherche backend de Contao**
+- nouvelle extension **vue ERD** de toutes les tables MetaModels et de leurs relations
+- nouvelle extension **Health-Check** pour détecter et nettoyer les données MetaModels orphelines
+- nouvelle extension **ChangeLanguage-Bridge** pour le sélecteur de langue sur les pages de détail
 - modifications d'enregistrements dans le journal système
 - **gestion des versions** pour la configuration MM et les items MM
 - **diverses accélérations** au niveau du DCG, de la recherche par périmètre/géodistance, du rendu différé (Lazy-Rendering)
@@ -114,6 +118,11 @@ supérieure conserve sa priorité, les adaptations existantes continuent donc de
 
 Pour sa propre version Twig des templates de widget, une règle est à respecter - le bloc ``label`` est remplacé
 pour les champs comportant un badge de langue, voir :ref:`rst_extended_frontend_editing`.
+
+.. seealso:: En mode debug, un commentaire de début et de fin ainsi que le nom du template sont affichés dans le
+   code source pour les templates html5 du frontend - cela permet de voir quel template affiche quoi où. Pour
+   les templates Twig, ces informations sont également disponibles avec l'extension `contao-twig-debug-marker-bundle
+   <https://github.com/e-spin/contao-twig-debug-marker-bundle>`_.
 
 
 Icônes du backend (révisées)
@@ -281,6 +290,85 @@ indications déjà renseignées prennent effet immédiatement.
 L'apparence et le fonctionnement proviennent de Contao lui-même - c'est le même fil d'Ariane que dans les
 modules du noyau, y compris le menu déroulant derrière l'ellipse. Voir aussi :ref:`component_relations` au
 sujet des tables enfants.
+
+
+La recherche backend trouve les enregistrements MetaModels (NOUVEAU)
+......................................................................
+
+La recherche backend globale de Contao (champ de recherche en haut de l'en-tête, raccourci clavier Ctrl+K)
+parcourt depuis Contao 5.5 également les enregistrements de certaines tables - à condition que leur
+``dataContainer`` soit exactement ``Contao\DC_Table``. Chaque table MetaModels - aussi bien les tables de
+configuration ``tl_metamodel_*`` que chaque table d'items générée - utilise à la place le DC_General, raison
+pour laquelle **rien** n'y apparaissait jusqu'ici. MetaModels 2.5 fournit pour cela son propre fournisseur de
+recherche, qui couvre les **tables d'items** - donc les enregistrements proprement dits d'un MetaModel, pas sa
+configuration.
+
+**Ce qui est parcouru :** exactement les attributs déjà marqués comme « Recherchable » dans le masque de
+saisie - la même case à cocher qui alimente déjà la sélection des champs de la recherche en liste dans le
+backend. Il n'y a donc **aucun réglage supplémentaire** : si un attribut y est coché, il apparaît
+automatiquement aussi dans l'index de recherche global.
+
+**MetaModels traduits :** pour chaque langue dans laquelle un enregistrement possède réellement sa propre
+valeur, un résultat distinct apparaît avec son propre lien d'édition - le clic ouvre le masque directement
+sur l'onglet de langue correspondant. Une langue qui n'a jamais été traduite pour l'enregistrement et qui
+n'affiche donc que la valeur de la langue de repli ne génère **aucun** résultat propre (en double) -
+exactement les cas que l'on reconnaît dans le masque de saisie lui-même au badge orange « Repli ».
+
+**Titre et autorisation :** le résultat affiche le nom du MetaModel et le titre de l'enregistrement (le même
+schéma que sous « Compléments au titre du masque », voir ci-dessus), et pour les traductions, en plus, le
+code de langue. La visibilité d'un résultat pour un utilisateur connecté dépend des droits d'accès MetaModels
+déjà en place sur la section concernée - il n'existe pas d'autorisation propre à cet effet.
+
+.. note:: La recherche backend de Contao a besoin d'un worker en arrière-plan qui tourne en permanence
+   (``messenger:consume``), qui construit l'index de recherche et le maintient à jour. Sans lui, le champ de
+   recherche n'apparaît pas du tout dans l'en-tête - indépendamment de MetaModels, cela concerne de la même
+   façon toute table Contao parcourable.
+
+
+Sélecteur de langue sur les pages de détail (NOUVEAU)
+......................................................
+
+La nouvelle extension à installer séparément :ref:`metamodels/changelanguage-bridge
+<rst_extended_changelanguage-bridge>` rend `« ChangeLanguage »
+<https://github.com/terminal42/contao-changelanguage>`_ sensible à l'item sur les pages de détail
+MetaModels : le sélecteur de langue renvoie alors directement vers le même enregistrement dans la langue
+cible avec le slug correspondant, au lieu de revenir à la page d'accueil de la langue. Remplace les deux
+solutions de contournement précédentes (règle de filtre « Rechercher dans toutes les langues » ou un hook
+``changelanguageNavigation`` propre) par une simple case à cocher par paramétrage de rendu. De plus, les
+paramètres de filtre GET (par ex. ``?alias=...``) sont automatiquement repris sans cette case à cocher -
+même pour des modèles monolingues, sans entrée dans « Conserver les paramètres de requête ». Plus de
+détails sous :ref:`Multilinguisme <component_multi-language_fe-output>`.
+
+
+Vue ERD de toutes les tables MetaModels (NOUVEAU)
+..................................................
+
+La nouvelle extension à installer séparément :ref:`metamodels/erd-viewer <rst_extended_erd-viewer>` affiche
+un `schéma entité-association <https://fr.wikipedia.org/wiki/Mod%C3%A8le_entit%C3%A9-association>`_ de
+toutes les tables MetaModels, généré automatiquement à partir de la base de données, dans le backend -
+accessible via une nouvelle entrée de menu dans la liste « Tous les MetaModels ». Sont représentées aussi
+bien les relations d'attributs (sélection, tags et leurs variantes traduites, chacune avec sa cardinalité)
+que les :ref:`relations parent-enfant <component_relations_child-tables>`. La vue peut être filtrée, les
+sélections filtrées peuvent être enregistrées comme « vue » pour tous les utilisateurs du backend, et
+l'extrait actuel ou la sélection actuelle peuvent être exportés en SVG, PNG, Graphviz ``.dot`` ou GraphML -
+ce dernier par ex. pour un retravail dans `yEd Live <https://www.yworks.com/yed-live/>`_, gratuit. Voir
+aussi :ref:`Structure de la base de données <component_relations_database_structure>`.
+
+
+Health-Check pour nettoyer les données orphelines (NOUVEAU)
+.............................................................
+
+La nouvelle extension à installer séparément :ref:`metamodels/health-check <rst_extended_health-check>`
+trouve et nettoie les données MetaModels incohérentes - par ex. des lignes dans les tables de stockage
+propres aux attributs (tags, texte multiple/tableau de texte, évaluations et leurs variantes traduites) qui
+subsistent après la suppression d'un attribut ou d'un enregistrement, parce que le DCG ne voit jamais ces
+tables supplémentaires. Accessible via une nouvelle entrée de menu dans la liste « Tous les MetaModels »,
+tout comme la vue ERD, réservée aux administrateurs. Les vérifications sont conçues de façon modulaire
+(possibilité d'en ajouter via ``services.yml``) et n'apparaissent que si elles peuvent effectivement
+s'appliquer à l'installation en cours ; chaque nettoyage dispose d'un aperçu (dry-run) avant la suppression
+effective, chaque nettoyage réellement exécuté est journalisé, une sauvegarde peut être déclenchée
+directement depuis la page - elle se restaure comme d'habitude via le Contao-Manager ou la console - et
+chaque vérification peut aussi être exécutée via une commande de console (par ex. pour des tâches cron).
 
 
 DC_General

@@ -244,7 +244,8 @@ Des extensions comme `« ChangeLanguage » <https://github.com/terminal42/contao
 sans l'alias du filtrage.
 
 Pour transmettre à l'extension la valeur pour les autres langues et filtrer en conséquence,
-plusieurs possibilités existent :
+plusieurs possibilités existent - la moins contraignante étant l'extension
+:ref:`metamodels/changelanguage-bridge <rst_extended_changelanguage-bridge>` décrite plus bas.
 
 **1. Règle de filtre « Requête simple » avec l'option « Rechercher dans toutes les langues »**
 
@@ -304,6 +305,22 @@ Le hook est appelé une fois pour chaque langue dans le sélecteur de langue.
 
 Avec cette variante, les indications pour ``hreflang`` dans les métadonnées sont également
 correctement définies - :ref:`voir SEO <rst_cookbook_tips_seo_metadata-hreflang>`.
+
+
+**3. Extension « ChangeLanguage-bridge » (à partir de MM 2.5)**
+
+L'extension :ref:`metamodels/changelanguage-bridge <rst_extended_changelanguage-bridge>` décharge
+du hook de la variante 2 : il suffit de cocher « Prendre en charge le sélecteur de langue » pour
+chaque paramétrage de rendu, le paramètre de filtre correspondant à la langue cible respective est
+alors déterminé automatiquement à partir de la configuration de saut déjà maintenue pour le
+paramétrage de rendu - aucune liste fixe d'ID de pages ni de code PHP propre n'est nécessaire.
+
+De plus, la même extension reprend automatiquement les paramètres de filtre GET (par ex.
+``?alias=...``) dans le sélecteur de langue, sans cette case à cocher - une entrée manuelle dans
+« Conserver les paramètres de requête » comme dans la variante 1 devient ainsi également superflue
+pour les modèles monolingues. La raison pour laquelle ChangeLanguage reprend de lui-même les
+segments de chemin (``/alias/...``) mais pas les paramètres GET est expliquée sous
+« :ref:`rst_extended_changelanguage-bridge_slug-get` ».
 
 
 Édition en frontend (FEE)

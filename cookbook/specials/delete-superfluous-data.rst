@@ -6,6 +6,12 @@ Suppression des données superflues
 .. note:: Effectuez impérativement une sauvegarde des données avant toute suppression ! - |br|
    par ex. avec ``php vendor/bin/contao-console contao:backup:create``
 
+.. tip:: Depuis MetaModels 2.5, l'extension :ref:`metamodels/health-check <rst_extended_health-check>` prend en
+   charge exactement cette tâche directement dans le backend - avec un aperçu avant la suppression, un journal de
+   nettoyage et un bouton de sauvegarde sur la même page, sans aucun accès shell, et couvre toutes les tables
+   listées ci-dessous. C'est la méthode recommandée et la plus confortable ; le script ci-après continue
+   toutefois de fonctionner sans changement - ou utilisez les commandes séparées de l'extension.
+
 Lorsque des modèles ou des attributs sont supprimés, il peut arriver que tous les enregistrements ne soient pas
 supprimés en même temps. C'est le cas pour tous les attributs qui ne stockent pas leurs données directement dans la
 table MetaModel ``mm_*``, mais utilisent leurs propres tables. C'est le cas pour les attributs suivants :

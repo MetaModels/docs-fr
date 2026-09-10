@@ -44,6 +44,12 @@ ainsi qu'une auto-référence pour un remplacement de congés :
 
 |img_db-schema_01|
 
+.. note:: **À partir de MM 2.5 :** L'extension à installer séparément :ref:`metamodels/erd-viewer
+   <rst_extended_erd-viewer>` génère automatiquement un tel schéma à partir de la base de données -
+   directement dans le backend, avec filtre, détails au clic et export en SVG/PNG/Graphviz/GraphML.
+   Cela ne remplace pas dans tous les cas la maintenance manuelle (par ex. pour un schéma de
+   documentation soigné), mais l'épargne pour l'aperçu quotidien.
+
 
 .. _component_relations_standard-relations:
 Relations standard
