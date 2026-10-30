@@ -183,3 +183,19 @@ Pour les corrections, on demande à l'agent de **recharger l'aide et les remarqu
 Tant que des enregistrements se trouvent dans les tables, ``metamodels_undo`` refuse d'annuler les MetaModels. Les pages,
 articles et éléments de contenu ne figurent pas dans le journal, ils sont créés via la Contao-API. Plus de détails sous
 :ref:`Annulation <rst_extended_mcp-admin>`.
+
+
+La suite possible
+-----------------
+
+La recette s'arrête à la **mise en place** : MetaModels, masque de saisie, réglages de rendu, filtres, pages et données
+d'exemple. L'**adaptation des templates** n'en fait pas partie et n'a pas été traitée lors du test. C'est l'étape
+suivante, car la sortie dans le frontend correspond ensuite au standard du réglage de rendu. Par exemple :
+
+* une mention « Annulé » pour les événements dont la case ``cancelled`` est cochée, dans la liste et sur la page de
+  détail,
+* la présentation de l'image, de la date et du lieu dans la liste et la structure de la page de détail,
+* des classes et une mise en forme pour sa propre mise en page.
+
+Les outils n'écrivent pas de templates. On les crée à la main, voir :ref:`Templates <rst_cookbook_templates_index>`, ou
+on en discute avec l'agent dans une étape distincte, en précisant ce que le template doit afficher.
