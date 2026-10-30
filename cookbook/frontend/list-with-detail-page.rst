@@ -22,10 +22,13 @@ L'entrée de la page de détail est retrouvée grâce à un alias présent dans 
 ``/evenement/forum-du-sport-2026-11-07``. Pour cela, on crée un attribut :ref:`Alias <component_attribute_alias>`
 - pour un MetaModel multilingue :ref:`Alias traduit <component_attribute_translatedalias>`.
 
-Trois réglages sont importants :
+Quatre réglages sont importants :
 
 * **Champs pour l'alias** : titre et date de début. La date permet de distinguer l'alias même si deux événements ont le
   même titre.
+* **Champs obligatoires** : les attributs dont l'alias est issu sont réglés sur « Champ obligatoire » dans le masque de
+  saisie. Si l'un d'eux reste vide, l'alias est incomplet et change dès qu'il est rempli plus tard - et avec lui le lien
+  vers la page de détail.
 * **Valeurs uniques** : l'option des réglages généraux de l'attribut garantit que l'alias n'existe qu'une seule fois.
 * **Toujours mettre à jour** : l'alias est regénéré à chaque enregistrement. Sans cette option, un alias une fois
   attribué reste en place même si le titre change.

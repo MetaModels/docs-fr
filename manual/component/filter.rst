@@ -107,7 +107,7 @@ Types de règles de filtre
 
 
 Paramètres de réglage
-------------------------
+---------------------
 
 Les différentes règles de filtre peuvent être adaptées aux besoins individuels grâce à des
 possibilités de réglage spécifiques. Pour la plupart des règles de filtre, les paramètres suivants
@@ -156,6 +156,7 @@ filtre, et la règle de filtre peut par ex. être insérée à l'intérieur d'un
 
 
 .. _component_filter_list:
+
 Détails de toutes les règles de filtre
 ------------------------------------------
 

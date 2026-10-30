@@ -120,7 +120,8 @@ L'administration MCP complète le serveur de Contao par les éléments suivants 
        filtres.
    * - ``metamodels_describe``
      - Outil
-     - La configuration d'un MetaModel : attributs, masques de saisie avec champs, réglages de rendu, filtres.
+     - La configuration d'un MetaModel : attributs, masques de saisie avec champs et conditions d'affichage,
+       réglages de rendu, filtres.
    * - ``metamodels_check_types``
      - Outil
      - Vérifie les types dont une tâche a besoin : les types manquants sont indiqués avec la commande
@@ -150,6 +151,8 @@ Exemples de demandes à l'agent :
 * *« J'ai besoin d'un MetaModel pour des événements avec titre, date, lieu et un prix. De quels paquets ai-je besoin ? »*
 * *« Crée le MetaModel et montre-moi d'abord le plan. »*
 * *« Montre-moi tous les collaborateurs du service Ventes. »* (via la Contao-API)
+
+Un exemple détaillé figure dans le cookbook : :ref:`Gestion d'événements avec un agent IA <rst_cookbook_mcp_event-management>`.
 
 
 Vérifier les paquets et l'accès
@@ -184,6 +187,16 @@ Le déroulement comprend trois étapes :
 Un MetaModel a besoin d'un masque de saisie et de réglages de rendu affectés aux utilisateurs du backend pour pouvoir
 être ouvert dans le backend. Les deux sont créés automatiquement pour le premier MetaModel.
 
+Un champ du masque de saisie peut être lié à une :ref:`condition d'affichage <component_dca_visibility-conditions>`, par
+ex. la date de fin d'un événement uniquement si la case « Sur plusieurs jours » est cochée. L'agent la crée sur le champ
+(``conditions``). Les règles suivantes s'appliquent :
+
+* Les conditions d'un niveau sont combinées avec ET, un wrapper ``conditionand`` n'est pas nécessaire.
+* Le champ de l'attribut auquel se rapporte la condition (ici « Sur plusieurs jours ») nécessite l'option « Envoyer en
+  cas de modification ». Sans elle, le backend n'affiche l'effet qu'après l'enregistrement. Le planificateur le signale.
+* Les types proviennent du core : *La valeur de la propriété est*, *La propriété contient l'un de*, *La propriété est
+  visible* ainsi que les conteneurs *ET*, *OU* et *NON*.
+
 Après la création, la Contao-API connaît immédiatement le MetaModel. Pour qu'il apparaisse dans le frontend, l'agent
 crée une page, un article et un élément de contenu de type *Liste MetaModel* (``metamodel_content``).
 
@@ -192,7 +205,7 @@ La description est l'**état souhaité**, y compris pour l'existant : le plan mo
 modifié ; tout le reste demeure inchangé.
 
 Non pris en charge (signalé comme problème) : un autre type ou une autre colonne pour un attribut existant, un autre
-type ou un autre attribut pour une règle de filtre existante, ajouter des langues, basculer les variantes et modifier
+type ou un autre attribut pour une règle de filtre ou une condition d'affichage existante, ajouter des langues, basculer les variantes et modifier
 l'ordre. Rien n'est supprimé - sauf lors de l'annulation d'une opération d'écriture.
 
 
@@ -259,3 +272,59 @@ Configuration
 
 ``journal_dir`` définit où se trouvent les journaux des opérations d'écriture. Avec ``write``, l'écriture est
 autorisée.
+
+
+Conseils et questions fréquentes
+--------------------------------
+
+Un exemple complet pas à pas figure dans le cookbook sous
+:ref:`Gestion d'événements avec un agent IA <rst_cookbook_mcp_event-management>`.
+
+**Comment procéder au mieux ?**
+
+* Par petites étapes, en vérifiant le résultat après chaque étape (backend, frontend).
+* Faire d'abord **planifier** l'agent (« Planifie …, n'écris encore rien »), lire et corriger le plan, et ne l'appliquer
+  qu'ensuite.
+* Dire ce qui ne doit **pas** se produire (« Les pages et les enregistrements viennent à l'étape suivante »).
+* Faire indiquer le ``journal_id`` à l'agent après chaque opération d'écriture.
+* Le faire poser des questions en cas de doute : « Là où quelque chose n'est pas possible avec les outils, dis-le-moi. »
+
+**L'agent ne trouve pas les outils.**
+Certains agents ne chargent les outils qu'après quelques secondes. Dans le prompt, on nomme le serveur (par ex.
+« utilise le serveur MCP contao ») et on indique son adresse. Si la connexion a expiré, une nouvelle connexion aide (avec
+Codex ``codex mcp login contao``).
+
+**L'agent signale qu'un type n'est pas installé.**
+Il manque alors un paquet, par exemple pour le multilinguisme (``attribute_translated*``). L'agent nomme le paquet et
+l'accès. On l'installe soi-même et on fait revérifier les types avec ``metamodels_check_types``. L'agent ne doit pas se
+rabattre sur une variante qui manque la tâche (par ex. monolingue au lieu de multilingue).
+
+**Faut-il dire « multilingue » ?**
+Oui, avec les langues et la langue par défaut (« DE, EN, FR - DE est la langue par défaut »). Cela inclut quels champs
+doivent être traduits et lesquels valent pour toutes les langues (par ex. les champs de contact).
+
+**Que ne peut pas faire l'agent ?**
+
+* Écrire des templates (par ex. un badge « Annulé » dans la sortie),
+* modifier l'ordre des attributs et des champs, supprimer quelque chose et renommer des colonnes,
+* ajouter des langues et basculer les variantes,
+* installer des paquets.
+
+Il doit le dire et indiquer une voie dans le backend. Sinon, on le lui demande.
+
+**Les données sont dans le backend, mais les liens de détail manquent.**
+MetaModels génère l'alias lors de l'enregistrement dans le backend. Quiconque crée des enregistrements via la Contao-API
+doit fournir la valeur de l'alias. Les attributs dont l'alias est issu (par ex. titre et date) devraient être des champs
+obligatoires, sinon l'alias est incomplet et change plus tard (voir :ref:`Liste avec page de détail
+<rst_cookbook_frontend_list-with-detail-page>`).
+
+**La liste affiche aussi des entrées non publiées.**
+Le filtre a besoin de la règle *État de la case à cocher* (paquet ``attribute_checkbox``) sur l'attribut « publié ». La
+règle « Oui / Non » (``filter_checkbox``) est un widget pour les visiteurs et ne filtre que lorsque quelqu'un l'utilise.
+
+**Que se passe-t-il si la réponse de l'agent change après une mise à jour ?**
+L'aide (``metamodels://guide/overview``) et les remarques du planificateur sont chargées au début de la conversation. On
+demande à l'agent de les recharger après une mise à jour du système ou de l'extension.
+
+**Est-ce adapté aux sites en production ?**
+Non, l'écriture est prévue pour les systèmes de développement. L'agent agit avec les droits de l'utilisateur backend.

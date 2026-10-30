@@ -22,11 +22,11 @@ liens vers le forum ou d'autres sites web à l'adresse e-mail suivante :
     inputmask/index.rst
     filter/index.rst
     frontend/index.rst
+    mcp/index.rst
     templates/index.rst
     tips/index.rst
     specials/index.rst
     other-tutorials/index.rst
-    reference/index.rst
 
 .. _manual@metamodel.me: manual\@metamodel.me?Subject=Mein%20Rezept%20f%FCr%20das%20MM-Kochbuch&Body=Mein%20Rezept%3A%0A
 
