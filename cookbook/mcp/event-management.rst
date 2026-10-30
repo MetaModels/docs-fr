@@ -100,7 +100,7 @@ l'affectation au backend manque - on demande alors à l'agent de vérifier et de
 ``metamodels_describe``.
 
 Dans le backend, la date de fin d'un nouvel événement n'apparaît-elle que lorsqu'on clique sur « Sur plusieurs jours » ?
-Cela suppose que la case à cocher ait « Envoyer en cas de modification », le planificateur le signale. Si la condition
+Cela suppose que la case à cocher ait « Enregistrer lors de la modification », le planificateur le signale. Si la condition
 manque, on demande à l'agent de l'ajouter, par ex. « La date de fin ne doit apparaître que si Sur plusieurs jours est
 coché. Planifie d'abord et montre-moi le plan. » Si le titre et la date de début, dont l'alias est issu, ne sont pas des
 champs obligatoires, le planificateur le signale aussi.

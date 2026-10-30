@@ -192,8 +192,8 @@ ex. la date de fin d'un événement uniquement si la case « Sur plusieurs jours
 (``conditions``). Les règles suivantes s'appliquent :
 
 * Les conditions d'un niveau sont combinées avec ET, un wrapper ``conditionand`` n'est pas nécessaire.
-* Le champ de l'attribut auquel se rapporte la condition (ici « Sur plusieurs jours ») nécessite l'option « Envoyer en
-  cas de modification ». Sans elle, le backend n'affiche l'effet qu'après l'enregistrement. Le planificateur le signale.
+* Le champ de l'attribut auquel se rapporte la condition (ici « Sur plusieurs jours ») nécessite l'option « Enregistrer lors de
+  la modification ». Sans elle, le backend n'affiche l'effet qu'après l'enregistrement. Le planificateur le signale.
 * Les types proviennent du core : *La valeur de la propriété est*, *La propriété contient l'un de*, *La propriété est
   visible* ainsi que les conteneurs *ET*, *OU* et *NON*.
 
