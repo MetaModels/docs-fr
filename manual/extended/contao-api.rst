@@ -118,6 +118,9 @@ Les valeurs sont converties, par type d'attribut, dans un format JSON approprié
 tags et les sélections multiples en liste et les fichiers en liste d'UUID. La réponse est une Hydra-Collection avec
 ``totalItems`` et les liens vers les pages.
 
+Les attributs de type *Horodatage* (date, heure) sont fournis et attendus sous forme de **timestamp Unix** : un entier en
+secondes, par ex. ``1798675200`` pour le 31.12.2026, 00:00 UTC.
+
 
 MetaModels multilingues
 -----------------------
@@ -149,6 +152,11 @@ données. Avant l'enregistrement, le contenu est vérifié :
 * L'**index de recherche** de la recherche backend de Contao est mis à jour (uniquement si ``contao.backend_search``
   est activé et que le worker tourne), de même que l'index du :ref:`filtre Loupe <rst_extended_loupe>`. Une erreur à
   cette occasion n'interrompt pas l'enregistrement, elle est consignée dans le journal comme avertissement.
+* Le **cache HTTP** est informé comme dans le backend : après l'enregistrement et la suppression, les tags de cache de
+  la table (``contao.db.<table>``) et de l'item (``contao.db.<table>.<id>``) expirent. Les listes de MetaModels (module
+  et élément de contenu) portent les deux tags, afin que les nouveaux items, les items qui ne correspondent au filtre
+  qu'après une modification, et les listes vides expirent aussi dans le cache. Sans cache HTTP prenant en charge les
+  tags, rien ne se passe.
 
 D'autres extensions peuvent réagir à l'enregistrement et à la suppression : l'interface déclenche pour cela les
 événements Symfony ``metamodels.contao-api.item-saved`` (arguments ``metamodel`` et ``created``) et
@@ -166,6 +174,26 @@ Pour les MetaModels avec variantes, les items possèdent les champs ``varbase`` 
 * Les **attributs partagés** sont modifiés sur l'item de base et transmis aux variantes.
 * Le ``vargroup`` d'un item existant ne peut pas être modifié.
 * Lors de la suppression d'un item de base, les variantes sont supprimées avec lui.
+
+
+Champs avec le MultiColumnWizard
+--------------------------------
+
+Le bundle API de Contao ne connaît pas le MultiColumnWizard. Le bundle ``menatwork/contao-multicolumnwizard-bundle``
+apporte donc son propre convertisseur (à partir de la version 3.8, actuellement la branche ``develop``), qu'il ne charge
+que si le bundle API est actif. Ainsi, les champs avec ce widget apparaissent dans les ressources de Contao
+(``/contao/api/dc/…``), par exemple les paramètres d'un module ou d'un élément de contenu MetaModels :
+
+* Un champ est une **liste d'objets**, une propriété par colonne. Chaque colonne est convertie comme le widget qu'elle
+  utilise dans le backend (texte, sélection, fichier, etc.). ``minCount`` et ``maxCount`` du widget valent comme nombre
+  minimal et maximal de lignes.
+* Lors de l'écriture, le widget vérifie chaque cellule comme dans le backend (par ex. champs obligatoires) ; les erreurs
+  figurent dans la réponse avec le chemin de la cellule (``422``).
+* Ne sont pas pris en charge les champs dont les colonnes proviennent d'une fonction (``columnsCallback``) et les champs
+  avec une colonne pour laquelle il n'existe pas de convertisseur. Ils manquent dans l'interface afin qu'aucune valeur
+  ne se perde lors de l'écriture.
+* Si une colonne est en lecture seule, tout le champ est en lecture seule : lors de l'ajout, de la suppression ou du
+  réordonnancement de lignes, la valeur de cette colonne ne pourrait pas être conservée.
 
 
 Limitations connues

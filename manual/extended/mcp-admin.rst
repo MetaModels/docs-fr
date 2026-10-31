@@ -68,6 +68,13 @@ Avec Codex, cela se présente ainsi :
    codex mcp add contao --url https://example.org/contao/mcp
    codex mcp login contao
 
+Avec Claude Code, le serveur est enregistré comme serveur HTTP. On lance la connexion dans le programme avec ``/mcp`` :
+choisir le serveur, *Authenticate*, se connecter dans le navigateur et accepter.
+
+.. code-block:: bash
+
+   claude mcp add --transport http contao https://example.org/contao/mcp
+
 Contao n'autorise que les clients qui s'identifient avec un document public (*Client ID Metadata Document*) et dont
 le domaine est autorisé. Sont préconfigurés ``chatgpt.com`` (Codex), ``claude.ai`` et ``vscode.dev``. D'autres
 clients sont autorisés avec :
@@ -79,7 +86,8 @@ clients sont autorisés avec :
        cimd_trusted_domains: ['example.org']
 
 Le serveur récupère lui-même le document du client sur Internet - le système a besoin pour cela d'une connexion
-sortante. L'authentification et le déroulement ont été testés avec Codex ; un test avec Claude reste à faire.
+sortante. L'authentification et le déroulement ont été testés avec Codex et avec Claude Code (lire, écrire, planifier,
+appliquer et annuler).
 
 .. note:: Pour l'appel de ``contao_api_execute`` (lire et écrire des données), Codex demande une confirmation à chaque
    appel, car l'outil n'est pas marqué comme *en lecture seule*.
@@ -187,6 +195,12 @@ Le déroulement comprend trois étapes :
 Un MetaModel a besoin d'un masque de saisie et de réglages de rendu affectés aux utilisateurs du backend pour pouvoir
 être ouvert dans le backend. Les deux sont créés automatiquement pour le premier MetaModel.
 
+Si le MetaModel doit apparaître dans le backend dans un **groupe de navigation propre**, l'agent renseigne la zone du
+backend sur le masque de saisie. Le groupe lui-même est de la configuration (``meta_models_core.be_sections`` dans
+``config/config.yaml``, voir :ref:`Section propre dans la navigation du backend <rst_cookbook_tips_backend-section>`) et
+l'agent ne peut pas l'écrire. Il indique ce qu'il faut saisir. Ensuite, vider le cache. Sans le groupe, le MetaModel
+n'apparaît pas dans la navigation.
+
 Un champ du masque de saisie peut être lié à une :ref:`condition d'affichage <component_dca_visibility-conditions>`, par
 ex. la date de fin d'un événement uniquement si la case « Sur plusieurs jours » est cochée. L'agent la crée sur le champ
 (``conditions``). Les règles suivantes s'appliquent :
@@ -225,6 +239,27 @@ montre seulement ce qui se passerait. Il refuse l'annulation et ne modifie rien 
 
 Les tables et colonnes subsistent, la mise à jour de la base de données ne supprime rien. Un journal ne peut être
 annulé qu'une seule fois. Toutes les opérations d'écriture figurent dans le journal système de Contao.
+
+
+Templates
+---------
+
+Les templates ne sont pas écrits par l'administration MCP, mais par le serveur MCP de Contao avec ses outils de
+template (``contao_template_*``) : trouver et lire des templates, vérifier le code, déterminer les utilisateurs d'un
+template, créer et enregistrer un override, ainsi que créer, comparer et restaurer des points de restauration. L'agent
+peut ainsi aussi surcharger les templates de MetaModels, par exemple un bloc de la navigation de pages
+(``mm_pagination``) ou du filtre (``mm_filter_default``). Les :ref:`blocs Twig <component_templates_twig-blocks>` de ces
+templates restent accessibles dans l'override.
+
+Important :
+
+* L'agent crée un **point de restauration** avant chaque modification. Il vaut pour tout le répertoire ``templates/`` et
+  se trouve dans le cache de l'application - ce n'est pas une sauvegarde durable.
+* La vérification du code montre seulement que le template peut être compilé. Si la sortie est correcte, seule la page
+  dans le frontend le montre.
+* L'analyse des utilisateurs ne trouve pas les templates de MetaModels : MetaModels les charge depuis PHP, pas via Twig.
+  L'agent ne signale alors que les références non résolubles. Quelles listes utilisent un template doit être vérifié
+  dans le frontend.
 
 
 Base de connaissances (métadonnées)
@@ -305,7 +340,8 @@ doivent être traduits et lesquels valent pour toutes les langues (par ex. les c
 
 **Que ne peut pas faire l'agent ?**
 
-* Écrire des templates (par ex. un badge « Annulé » dans la sortie),
+* Adapter des templates uniquement avec les outils de template de Contao (voir ci-dessus), pas avec l'administration
+  MCP (par ex. un badge « Annulé » dans la sortie),
 * modifier l'ordre des attributs et des champs, supprimer quelque chose et renommer des colonnes,
 * ajouter des langues et basculer les variantes,
 * installer des paquets.

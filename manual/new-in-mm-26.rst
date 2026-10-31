@@ -23,6 +23,10 @@ Les principales nouvelles fonctionnalités sont :
   modifier, supprimer - avec les droits et la validation du backend), voir :ref:`Contao-API <rst_extended_contao-api>`.
   Via le serveur MCP de Contao, un agent IA peut aussi consulter et configurer MetaModels, voir
   :ref:`Administration MCP <rst_extended_mcp-admin>`.
+* **Blocs dans les templates wrapper** : les templates ``mm_filter_default``, ``mm_clearall_default`` et
+  ``mm_pagination`` sont divisés en blocs Twig (depuis MetaModels 2.5.2, également inclus dans 2.6). Un template
+  personnalisé étend le template par défaut et ne surcharge que le bloc souhaité, voir
+  :ref:`component_templates_twig-blocks`.
 
 
 Problèmes connus
@@ -40,6 +44,7 @@ Problèmes connus
 
 
 .. _check_upgrade_mm260:
+
 Vérifications pour la mise à niveau vers MM 2.6
 -----------------------------------------------
 
@@ -48,6 +53,12 @@ nécessaires des désignations et les modifications de la base de données sont 
 cependant quelques points qui ne peuvent pas, ou seulement très difficilement, être pris en charge ainsi. C'est
 pourquoi, lors du passage à MM 2.6, les points suivants doivent être gardés à l'esprit :
 
+* **Templates personnalisés au format** ``.html5`` : dans MetaModels 2.6, les templates ``.html5`` n'existent plus, les
+  templates fournis sont des templates Twig (``.html.twig``). Les overrides à plat dans le dossier ``templates/`` du
+  projet (par ex. ``templates/mm_filter_default.html5``) ne sont plus pris en compte et doivent être recréés en
+  ``.html.twig``, de préférence sous ``templates/metamodels/<groupe>/…``. Pour les templates wrapper du filtre, de la
+  réinitialisation du filtre et de la pagination, un ``{% extends %}`` avec le bloc concerné suffit, voir
+  :ref:`component_templates_twig-blocks`. La migration est décrite sous :ref:`new_in_mm250`.
 
 
 Refinancement
