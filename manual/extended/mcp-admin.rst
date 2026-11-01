@@ -201,6 +201,15 @@ backend sur le masque de saisie. Le groupe lui-même est de la configuration (``
 l'agent ne peut pas l'écrire. Il indique ce qu'il faut saisir. Ensuite, vider le cache. Sans le groupe, le MetaModel
 n'apparaît pas dans la navigation.
 
+Pour les **cases à cocher**, l'agent règle lui-même deux choses :
+
+* Le champ d'une nouvelle case à cocher dans le masque de saisie reçoit les classes CSS ``w50 cbx m12``, afin qu'il soit
+  aligné avec les champs voisins. Une ``tl_class`` indiquée dans les réglages du champ les remplace.
+* Si un filtre utilise la case à cocher comme « publié » (règle ``checkbox_published`` ou
+  ``translatedcheckbox_published``), l'agent active sur l'attribut l'option **Icône de bascule** (``check_publish``). La
+  liste du backend affiche alors l'œil habituel pour basculer. Avec ``"check_publish": false`` dans les réglages de
+  l'attribut, elle reste désactivée. Cela vaut aussi pour un attribut existant auquel l'option manque encore.
+
 Un champ du masque de saisie peut être lié à une :ref:`condition d'affichage <component_dca_visibility-conditions>`, par
 ex. la date de fin d'un événement uniquement si la case « Sur plusieurs jours » est cochée. L'agent la crée sur le champ
 (``conditions``). Les règles suivantes s'appliquent :

@@ -152,6 +152,12 @@ données. Avant l'enregistrement, le contenu est vérifié :
 * L'**index de recherche** de la recherche backend de Contao est mis à jour (uniquement si ``contao.backend_search``
   est activé et que le worker tourne), de même que l'index du :ref:`filtre Loupe <rst_extended_loupe>`. Une erreur à
   cette occasion n'interrompt pas l'enregistrement, elle est consignée dans le journal comme avertissement.
+* Les **attributs dérivés** (alias, valeurs combinées, token, index du filtre Levenshtein) sont créés lors de la création
+  d'un item, même s'ils ne figurent pas dans le masque de saisie et que la requête ne les mentionne pas. L'alias est
+  formé à partir des champs source de l'attribut, comme dans le backend. Cela nécessite MetaModels à partir de 2.6 (ou
+  2.5.4) : auparavant, ``saveItem()`` n'enregistrait pour un nouvel item que les attributs définis, de sorte qu'un item
+  créé via l'API ou un script n'avait pas d'alias. Pour un item existant, le réglage de l'attribut s'applique, comme
+  dans le backend.
 * Le **cache HTTP** est informé comme dans le backend : après l'enregistrement et la suppression, les tags de cache de
   la table (``contao.db.<table>``) et de l'item (``contao.db.<table>.<id>``) expirent. Les listes de MetaModels (module
   et élément de contenu) portent les deux tags, afin que les nouveaux items, les items qui ne correspondent au filtre
@@ -194,6 +200,128 @@ que si le bundle API est actif. Ainsi, les champs avec ce widget apparaissent da
   ne se perde lors de l'écriture.
 * Si une colonne est en lecture seule, tout le champ est en lecture seule : lors de l'ajout, de la suppression ou du
   réordonnancement de lignes, la valeur de cette colonne ne pourrait pas être conservée.
+
+
+Accès en lecture public
+-----------------------
+
+Contao lui-même n'offre pas encore d'interface pour le frontend : toutes les ressources du bundle API se trouvent sous
+``/contao/api`` et exigent un utilisateur backend. Pour les pages qui doivent lire des MetaModels en JSON sans connexion
+(par ex. avec Vue ou Stimulus), l'extension apporte donc un **accès en lecture seule** qui **ne passe pas par API
+Platform** et se situe en dehors du backend :
+
+* ``GET /api/mm/<table>`` renvoie une liste, ``GET /api/mm/<table>/<id>`` un seul item.
+* **Rien n'est public tant que ce n'est pas dans la configuration.** Pour chaque MetaModel, un **réglage de rendu** et un
+  **réglage de filtre** sont indiqués :
+
+  .. code-block:: yaml
+
+     # config/config.yaml
+     meta_models_contao_api:
+         public:
+             mm_evenements:
+                 render_setting: 35   # id du réglage de rendu
+                 filter: 16           # id du réglage de filtre
+                 sort_by: startdate   # facultatif, par défaut : id
+                 sort_direction: ASC  # facultatif
+                 per_page: 30         # facultatif, limite supérieure max_per_page (par défaut 100)
+                 cache_ttl: 3600      # facultatif, secondes dans le cache partagé
+
+* Les **attributs** du réglage de rendu sont ceux qui sont fournis, sous forme de textes rendus, tels qu'une liste du
+  frontend les affiche (par ex. une date comme date et une sélection avec son libellé).
+* Le **réglage de filtre** est obligatoire. Il limite les items (par ex. avec la règle *Publié*, sinon les items non
+  publiés seraient aussi visibles) et définit les paramètres acceptés comme paramètres de requête. Les autres paramètres
+  sont ignorés. Un item unique doit satisfaire le même filtre que la liste, sinon l'interface répond par ``404``.
+* La liste connaît ``page``, ``itemsPerPage`` et, pour les MetaModels multilingues, ``lang``. La réponse contient
+  ``total``, ``page``, ``itemsPerPage`` et ``items``. Les erreurs sont également renvoyées en JSON.
+* Les réponses sont autorisées pour le cache HTTP et marquées avec ``contao.db.<table>`` et
+  ``contao.db.<table>.<id>``. L'enregistrement d'un item dans le backend ou via l'interface les fait expirer.
+* Il n'y a pas d'en-tête CORS : la page qui récupère les données se trouve sur le même hôte.
+
+Exemple : affichage avec Vue
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Une liste avec recherche, pagination et vue détaillée ne nécessite qu'un peu de HTML et de JavaScript qui récupère le
+JSON. L'exemple de l'équipe est construit comme partie de la structure de pages, pas comme un fichier HTML fini :
+
+* **Une page** (par ex. « API Demo ») dans l'arborescence des pages avec un élément de contenu **HTML**. Comme template
+  de l'élément, on choisit une variante propre, ``ce_html_api_demo_events`` (fichier
+  ``templates/ce_html_api_demo_events.html.twig``). Elle contient le balisage, les styles et le script. Le template par
+  défaut de l'élément supprimerait ``<script>``, la variante restitue son contenu tel quel. Le champ *HTML* de l'élément
+  reste donc vide ou reçoit un commentaire.
+* **La bibliothèque** (``vue.global.prod.min.js``) se trouve dans un sous-dossier public de ``files/`` (par ex.
+  ``files/api-demo/``). Le dossier doit être **public** : dans le gestionnaire de fichiers, activer l'interrupteur
+  *Public*, ce qui crée le fichier ``.public``. Ensuite, exécuter ``contao:symlinks``. Ainsi, l'exemple n'a pas besoin
+  de CDN.
+* **Les expressions de Vue** s'écrivent avec ``v-text`` et des liaisons (``:href``), pas avec ``{{ … }}`` : Contao prend
+  ces accolades pour des balises d'insertion.
+* **Liens avec ``#`` :** Contao place ``<base href>`` dans la page. Un lien constitué uniquement de ``#/4`` mène donc à la
+  page d'accueil. L'exemple fait précéder le chemin de la page actuelle (``window.location.pathname``).
+* La page appelle l'interface sur le même hôte, sans connexion :
+
+  .. code-block:: javascript
+
+     const query = new URLSearchParams({ page: 1, itemsPerPage: 5, q: 'api' });
+     const response = await fetch('/api/mm/mm_evenements?' + query);
+     const { total, items } = await response.json();
+
+     // Vue détaillée d'un item
+     const item = await (await fetch('/api/mm/mm_evenements/4')).json();
+
+* ``q`` et d'autres paramètres sont les paramètres du réglage de filtre (dans l'exemple une recherche textuelle dans le
+  titre et une dans le lieu). Un item non publié renvoie ``404``, l'exemple affiche alors un message au lieu de la page
+  de détail.
+
+.. warning:: Tout ce qui figure dans le réglage de rendu et que le filtre laisse passer est accessible à tous. Un
+   attribut qui ne doit pas être public n'a rien à faire dans le réglage de rendu.
+
+
+Accès pour les membres connectés
+--------------------------------
+
+Les membres du site peuvent lire, créer, modifier et supprimer leurs **propres enregistrements** via la même interface,
+par exemple pour une édition frontend avec Vue ou Stimulus. Le core de Contao ne peut (pas encore) émettre de token pour
+les membres, c'est donc la **session du membre connecté** qui s'applique : la page appelle l'interface sur le même hôte,
+le navigateur envoie le cookie de session.
+
+* Les adresses : ``/api/member/mm/<table>`` (liste avec ``GET``, création avec ``POST``) et
+  ``/api/member/mm/<table>/<id>`` (``GET``, ``PATCH``, ``DELETE``). ``GET /api/member/me`` indique le nom d'utilisateur,
+  sans connexion toutes les adresses répondent par ``401``.
+* Ici aussi, **rien n'est accessible tant que ce n'est pas dans la configuration** :
+
+  .. code-block:: yaml
+
+     # config/config.yaml
+     meta_models_contao_api:
+         member:
+             - mm_evenements
+
+* Les droits sont ceux de l':ref:`édition frontend <rst_extended_frontend_editing>` : le **masque de saisie** affecté
+  aux groupes de membres (:ref:`affectations saisie/rendu <component_dca-combine>`) détermine quels attributs les
+  membres voient et écrivent et s'ils peuvent créer, modifier et supprimer des enregistrements.
+* Avec le réglage **Vérification des droits** du masque de saisie (attribut pour le membre : une sélection simple sur
+  ``tl_member`` avec l'alias ``username``), les membres ne voient et ne modifient que les enregistrements dans lesquels
+  ils sont désignés comme propriétaires. Les enregistrements d'autrui répondent par ``404``. Un enregistrement créé
+  appartient au membre connecté, le contenu de la requête ne peut pas désigner un autre propriétaire. Sans ce réglage,
+  tous les membres du groupe peuvent modifier tous les enregistrements, comme dans l'édition frontend.
+* L'écriture fonctionne comme avec l'interface du backend (validation des valeurs, versions, index de recherche,
+  cache). Les erreurs dans les valeurs arrivent avec ``422`` et une liste des problèmes. L'alias d'un nouvel
+  enregistrement est créé automatiquement, même si l'attribut ne figure pas dans le masque de saisie des membres.
+
+.. warning:: Une affectation pour le groupe de membres ``*`` s'applique à **chaque** membre et l'emporte par sa
+   position. Quiconque crée une ligne distincte pour les utilisateurs backend lui attribue donc un groupe de membres dans
+   lequel aucun membre ne se trouve (par ex. « Invités »), afin que les membres obtiennent leur propre masque de saisie.
+
+L'exemple pour les membres est une **sous-page d'une page protégée** (dans le test « API Demo FEE » sous « Mon compte
+TEST », protégée pour le groupe de membres). La sous-page hérite de la protection, seuls les membres connectés y
+accèdent. Comme la page publique, elle comporte un élément de contenu **HTML** avec une variante de template
+(``ce_html_api_demo_member``) qui restitue le formulaire de création et de modification et la liste des propres
+enregistrements. Si la session expire, la page affiche une indication avec le lien vers la connexion.
+
+Contre l'injection de requêtes par des sites tiers (CSRF), chaque requête modifiante exige ``Content-Type:
+application/json`` et l'en-tête ``X-Requested-With``. Les deux déclenchent sur un site tiers une vérification
+préalable que l'interface n'autorise pas (il n'y a pas d'en-tête CORS). Un token n'est pas nécessaire pour cela. Les
+réponses ne sont pas destinées au cache partagé.
 
 
 Limitations connues
