@@ -210,6 +210,12 @@ Pour les **cases à cocher**, l'agent règle lui-même deux choses :
   liste du backend affiche alors l'œil habituel pour basculer. Avec ``"check_publish": false`` dans les réglages de
   l'attribut, elle reste désactivée. Cela vaut aussi pour un attribut existant auquel l'option manque encore.
 
+Un nouvel attribut **alias** (``alias`` et ``translatedalias``) démarre, comme dans le backend, avec les options
+**Valeurs uniques** (``isunique``) et **Toujours mettre à jour** (``force_alias``, ``force_talias`` pour l'alias
+traduit). Dans un MetaModel avec variantes, l'agent ne les active pas, car les valeurs uniques n'y sont pas possibles.
+Avec ``false`` dans les réglages de l'attribut, une option reste désactivée. Les autres types d'attribut ne reçoivent
+pas ces valeurs par défaut.
+
 Un champ du masque de saisie peut être lié à une :ref:`condition d'affichage <component_dca_visibility-conditions>`, par
 ex. la date de fin d'un événement uniquement si la case « Sur plusieurs jours » est cochée. L'agent la crée sur le champ
 (``conditions``). Les règles suivantes s'appliquent :
