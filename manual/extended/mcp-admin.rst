@@ -211,7 +211,7 @@ Pour les **cases à cocher**, l'agent règle lui-même deux choses :
   l'attribut, elle reste désactivée. Cela vaut aussi pour un attribut existant auquel l'option manque encore.
 
 Un nouvel attribut **alias** (``alias`` et ``translatedalias``) démarre, comme dans le backend, avec les options
-**Valeurs uniques** (``isunique``) et **Toujours mettre à jour** (``force_alias``, ``force_talias`` pour l'alias
+**Valeurs uniques** (``isunique``) et **Forcer la régénération de l'alias** (``force_alias``, ``force_talias`` pour l'alias
 traduit). Dans un MetaModel avec variantes, l'agent ne les active pas, car les valeurs uniques n'y sont pas possibles.
 Avec ``false`` dans les réglages de l'attribut, une option reste désactivée. Les autres types d'attribut ne reçoivent
 pas ces valeurs par défaut.

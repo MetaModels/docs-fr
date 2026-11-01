@@ -30,7 +30,7 @@ Quatre réglages sont importants :
   saisie. Si l'un d'eux reste vide, l'alias est incomplet et change dès qu'il est rempli plus tard - et avec lui le lien
   vers la page de détail.
 * **Valeurs uniques** : l'option des réglages généraux de l'attribut garantit que l'alias n'existe qu'une seule fois.
-* **Toujours mettre à jour** : l'alias est regénéré à chaque enregistrement. Sans cette option, un alias une fois
+* **Forcer la régénération de l'alias** : l'alias est regénéré à chaque enregistrement. Sans cette option, un alias une fois
   attribué reste en place même si le titre change.
 
 .. note:: L'alias est créé lors de l'enregistrement dans le backend. Quiconque crée des entrées autrement (par ex. via
