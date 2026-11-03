@@ -75,6 +75,20 @@ choisir le serveur, *Authenticate*, se connecter dans le navigateur et accepter.
 
    claude mcp add --transport http contao https://example.org/contao/mcp
 
+.. note:: **Claude : mieux dans la console que dans l'application de bureau.** Lors du test, la connexion était stable
+   dans la console (``claude`` dans le dossier du projet), y compris le renouvellement du jeton après environ une heure.
+   Dans l'application de bureau, elle s'est interrompue à plusieurs reprises : pendant la nuit, après un redémarrage de
+   la base de données et une fois en pleine session, à chaque fois sans erreur côté serveur. Il n'y a pas de ``/mcp``
+   là-bas, et la page *Connecteurs* exige une adresse https publique - un système sur ``127.0.0.1`` ne peut pas y être
+   enregistré. Qui veut utiliser l'application enregistre le serveur avec ``claude mcp add`` (ou crée un fichier
+   ``.mcp.json`` dans le dossier du projet), l'authentifie une fois dans la console avec ``/mcp`` et démarre ensuite une
+   **nouvelle** session dans l'application.
+
+   Avant le premier prompt, on vérifie dans la console avec ``/mcp`` que le serveur indique *connected* et
+   *authenticated*. Une session en cours ne recharge pas le serveur : s'il n'était pas joignable au démarrage de la
+   session (base de données redémarrée, authentification expirée), même un *Reconnect* n'aide pas, seule une nouvelle
+   session le fait.
+
 Contao n'autorise que les clients qui s'identifient avec un document public (*Client ID Metadata Document*) et dont
 le domaine est autorisé. Sont préconfigurés ``chatgpt.com`` (Codex), ``claude.ai`` et ``vscode.dev``. D'autres
 clients sont autorisés avec :
@@ -255,6 +269,23 @@ montre seulement ce qui se passerait. Il refuse l'annulation et ne modifie rien 
 Les tables et colonnes subsistent, la mise à jour de la base de données ne supprime rien. Un journal ne peut être
 annulé qu'une seule fois. Toutes les opérations d'écriture figurent dans le journal système de Contao.
 
+**Ce que le journal ne connaît pas.** Il ne contient que ce que ``metamodels_apply`` a écrit. Les enregistrements, pages,
+articles, éléments de contenu, tailles d'image et fichiers de template sont créés via la Contao-API ou à la main et n'y
+figurent pas. Pour annuler un test **entièrement**, on procède dans cet ordre et on fait montrer chaque étape par l'agent
+avant qu'il l'exécute :
+
+1. Supprimer les éléments de contenu, articles et pages créés par l'agent, ainsi qu'une taille d'image créée et un
+   fichier de template. Ce qui existait déjà et que l'agent a seulement utilisé reste.
+2. Supprimer les enregistrements des MetaModels (pour les MetaModels traduits, par langue, avec ``lang``). Ce n'est
+   qu'ensuite que ``metamodels_undo`` accepte les MetaModels.
+3. Commencer ``metamodels_undo`` par l'entrée la **plus récente** du journal et remonter en arrière. D'abord sans
+   ``confirm``, cela montre ce qui se passe.
+4. Les tables vides (``DROP TABLE``) se suppriment à la main si elles gênent. ``metamodels_migrate_schema`` ne supprime
+   jamais, et un ``contao:migrate`` ultérieur peut les signaler comme superflues.
+
+L'agent doit dire au préalable ce qu'il veut supprimer. Il peut comprendre une consigne « annule tout » de façon à inclure
+aussi les données d'exemple et les pages qu'il a lui-même créées.
+
 
 Templates
 ---------
@@ -275,6 +306,16 @@ Important :
 * L'analyse des utilisateurs ne trouve pas les templates de MetaModels : MetaModels les charge depuis PHP, pas via Twig.
   L'agent ne signale alors que les références non résolubles. Quelles listes utilisent un template doit être vérifié
   dans le frontend.
+* ``contao_template_create_override`` ne connaît **pas de simulation**. Si l'agent envoie tout de même ``dry_run: true``,
+  le paramètre est ignoré sans message et le fichier est créé. Lors du test, il s'agissait d'un override vide pour
+  ``checkbox.html.twig``, qui aurait touché toutes les cases à cocher de la page. L'agent l'a remarqué et supprimé. On lui
+  demande de dire avant chaque création quel fichier sera créé, puis de vérifier ``git status`` ou le dossier
+  ``templates/``.
+* Pour le template d'**un seul attribut** (par ex. un badge uniquement si la case est cochée), les outils ne proposent pas
+  de variante. L'agent écrit alors le fichier lui-même et indique le nom dans le réglage de rendu de l'attribut (journal :
+  une modification, le fichier n'y figure pas). Lors du test, les deux fonctionnaient : un template Twig sous
+  ``templates/metamodels/attribute/`` et un ``.html5`` classique directement dans ``templates/`` (nom
+  ``mm_attr_<type>_…``). Le fichier se trouve en dehors du journal et reste en place lors de l'annulation.
 
 
 Base de connaissances (métadonnées)
@@ -343,6 +384,27 @@ Un exemple complet pas à pas figure dans le cookbook sous
 Certains agents ne chargent les outils qu'après quelques secondes. Dans le prompt, on nomme le serveur (par ex.
 « utilise le serveur MCP contao ») et on indique son adresse. Si la connexion a expiré, une nouvelle connexion aide (avec
 Codex ``codex mcp login contao``).
+
+**Les outils ont disparu en pleine conversation.**
+Le serveur est joignable, mais la session a perdu les outils (le plus souvent dans l'application de bureau, voir
+ci-dessus). On vérifie l'état dans la console avec ``/mcp``, on se réauthentifie si nécessaire et on démarre une
+**nouvelle session**. On y redonne la mission **complète**, car la nouvelle session ne connaît ni le souhait ni le plan
+précédent. Jusque-là, n'est écrit que ce qui figure dans le journal (``metamodels_journal``).
+
+**Le plan est soudain périmé.**
+Si l'agent écrit plusieurs plans l'un après l'autre ou en parallèle, un plan créé plus tôt peut devenir invalide (l'ordre
+des lignes a changé). L'agent le détecte et planifie à nouveau, il n'y a rien à faire. C'est pourquoi on lui fait appliquer
+les MetaModels l'un après l'autre : d'abord les catégories et les mots-clés, puis les événements.
+
+**L'agent propose une colonne factice (``fe_memberAttribut``).**
+Dans le masque de saisie, le planificateur exige un champ qui n'est nécessaire que pour les droits des membres dans le
+frontend. L'agent le remplit avec une colonne quelconque, cela n'a aucun effet tant que les droits des membres sont
+désactivés.
+
+**Un test doit être répété.**
+Le journal ne suffit pas pour cela (voir :ref:`Annuler <rst_extended_mcp-admin>`). Sur un système de test, on sauvegarde
+au préalable la base de données, ``files/`` et le répertoire ``var/mm_mcp_admin/journal`` et on les restaure - pas pendant
+qu'une session de l'agent est en cours.
 
 **L'agent signale qu'un type n'est pas installé.**
 Il manque alors un paquet, par exemple pour le multilinguisme (``attribute_translated*``). L'agent nomme le paquet et

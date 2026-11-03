@@ -3,6 +3,8 @@
 Gestion d'événements avec un agent IA
 =====================================
 
+**État : 03.11.2026**
+
 Cette recette montre comment un agent IA met en place, via :ref:`MCP <rst_extended_mcp-admin>`, une gestion d'événements
 complète : MetaModels multilingues, masque de saisie, réglages de rendu, filtres, pages et données d'exemple. C'est un
 **déroulé de conversation par étapes**, pas un script : l'agent travaille mieux quand on le guide par petites étapes et
@@ -26,6 +28,16 @@ Prérequis
   en production.
 * Dans le premier prompt, on indique l'adresse du site et du serveur MCP - par ex. ``https://example.org/`` et
   ``https://example.org/contao/mcp``.
+* Avec Claude, on lance de préférence l'agent dans la **console** (``claude`` dans le dossier du projet) et on vérifie
+  avant le premier prompt, avec ``/mcp``, que le serveur indique *connected* et *authenticated*. L'application de bureau
+  a perdu la connexion à plusieurs reprises lors du test, voir :ref:`Administration MCP <rst_extended_mcp-admin>`. Un
+  ``codex mcp login contao`` (Codex) ou ``/mcp`` (Claude) suffit lorsque l'authentification a expiré.
+* L'agent a besoin de **toute la mission dans la session**. Si l'on démarre une nouvelle session après une interruption,
+  on redonne le souhait de l'étape 1 et les décisions issues du plan.
+* Si les pages doivent être créées en plusieurs langues, Contao a besoin d'une **page d'accueil** (page racine) par
+  langue. Sans elle, l'agent ne crée pas de pages pour cette langue et pose la question - les textes des événements
+  sont néanmoins multilingues. On crée la page d'accueil au préalable ou on la fait créer par l'agent dans une étape
+  distincte.
 
 
 1. Décrire le souhait et le faire vérifier
@@ -95,6 +107,10 @@ planificateur. C'est le bon moment pour des corrections :
    résultat avec metamodels_describe pour les trois et donne-moi le journal_id de chaque opération d'écriture.
    Les pages et les enregistrements viennent à l'étape suivante.
 
+L'agent applique les MetaModels l'un après l'autre : d'abord les catégories et les mots-clés, puis les événements, car
+ceux-ci y font référence. S'il signale qu'un plan est périmé, il planifie à nouveau - c'est normal et ce n'est pas une
+erreur.
+
 **À vérifier :** les trois MetaModels sont-ils visibles dans le backend et peuvent-ils être ouverts ? Sinon,
 l'affectation au backend manque - on demande alors à l'agent de vérifier et de compléter les ``assignments`` avec
 ``metamodels_describe``.
@@ -119,6 +135,12 @@ champs obligatoires, le planificateur le signale aussi.
 .. tip:: Si l'agent cherche un outil dans la Contao-API, un **seul mot au singulier** aide comme terme de recherche
    (par ex. « page » au lieu de « créer des pages »).
 
+S'il existe déjà des pages pour la liste et le détail (par ex. d'un essai précédent), l'agent les réutilise au lieu de
+créer des doublons, et le dit. Il vaut mieux savoir au préalable quelles pages existent, sinon on ne sait plus ce qui
+vient de lui (important pour l'annulation, voir l'étape 7). Les filtres se trouvent avant la liste dans le même article,
+la page de détail est masquée et exige un élément (``requireItem``). Les filtres passent par l'**adresse**
+(``/categorie/atelier``, ``/mot-cle/musique``, ``/date/2026-11-01,2026-11-30``), pas par ``?categorie=atelier``.
+
 Pour les pages et les éléments de contenu, l'agent a besoin de la Contao-API. Codex demande une confirmation à chaque
 appel de ``contao_api_execute``.
 
@@ -140,6 +162,10 @@ opérations d'écriture. Cela prend du temps.
 .. warning:: MetaModels ne génère l'**alias** qu'à l'enregistrement dans le backend. Via la Contao-API, l'agent doit
    fournir la valeur, sinon les liens de détail manquent, voir
    :ref:`Liste avec page de détail <rst_cookbook_frontend_list-with-detail-page>`.
+   Lors du test, l'alias est resté vide après la création. Seule une seconde opération d'écriture (``PATCH``) l'a formé à
+   partir du titre et de la date de début (par ex. ``klimaschutz-konferenz-2026-2026-11-20``) ; les valeurs fournies par
+   l'agent ont alors été écrasées. On lui fait vérifier, après la création, que chaque événement a un alias dans chaque
+   langue.
 
 
 6. Vérifier la sortie et améliorer
@@ -164,9 +190,20 @@ On ouvre la page de liste dans le navigateur et on la vérifie. Améliorations t
      - « Trouve la cause : les liens doivent être /fr/evenement/<alias>, un événement non publié ne doit pas
        apparaître même via un lien enregistré en favori, les alias doivent être créés dans le backend à partir du
        titre et de la date de début. »
-   * - Le badge « Annulé » manque.
-     - C'est une affaire de template, les outils n'écrivent pas de templates - voir
+   * - Le badge « Annulé » manque, ou on lit « Annulé : 1 ».
+     - « Crée la mention « Annulé » dans la liste : au lieu de « Annulé : 1 », une mention bien visible doit apparaître
+       pour les événements annulés, rien pour les autres. Utilise pour cela un template. » L'administration MCP n'écrit
+       pas de templates, l'agent crée le fichier avec les outils de template de Contao ou l'écrit lui-même et
+       l'indique dans le réglage de rendu de la liste. Voir ci-dessous et
        :ref:`Templates <rst_cookbook_templates_index>`.
+   * - Sur la page de détail, on lit toujours « Annulé : 1 ».
+     - L'agent ne modifie que ce qui a été demandé. Avec « Fais-le aussi sur la page de détail », il change le réglage de
+       rendu de la page de détail.
+   * - Il n'y a pas de pages pour une langue.
+     - La page d'accueil de cette langue manque, voir les prérequis.
+   * - Le filtre au-dessus de la liste manque ou n'a aucun effet.
+     - « Vérifie que l'élément de filtre se trouve au-dessus de la liste et appelle la liste avec /categorie/atelier. »
+       Les filtres sont un élément de contenu à part et passent par l'adresse, pas par ``?categorie=``.
 
 Pour les corrections, on demande à l'agent de **recharger l'aide et les remarques du planificateur**
 (``metamodels://guide/overview``) si le système a changé depuis le début de la conversation.
@@ -183,6 +220,76 @@ Pour les corrections, on demande à l'agent de **recharger l'aide et les remarqu
 Tant que des enregistrements se trouvent dans les tables, ``metamodels_undo`` refuse d'annuler les MetaModels. Les pages,
 articles et éléments de contenu ne figurent pas dans le journal, ils sont créés via la Contao-API. Plus de détails sous
 :ref:`Annulation <rst_extended_mcp-admin>`.
+
+Lors du test, l'annulation s'est déroulée ainsi, et c'est ainsi qu'il faut la conduire :
+
+1. L'agent montre le journal (ici cinq entrées) et vérifie chaque entrée sans ``confirm``.
+2. Il indique que la configuration ne peut être annulée que si les tables sont vides, et supprime d'abord ses éléments de
+   contenu, articles, pages, la taille d'image et le fichier de template, puis les enregistrements (pour les MetaModels
+   traduits avec ``lang``).
+3. Ensuite, il annule les entrées du journal, la plus récente d'abord.
+4. Il vérifie le résultat (nombre de MetaModels, de pages, d'éléments de contenu) et dit ce qui reste.
+
+Sont restées les **tables vides** ``mm_event_categories``, ``mm_event_tags`` et ``mm_event_events`` (``DROP TABLE`` à la
+main si on n'en veut pas) et les pages qui existaient déjà auparavant. L'agent ne les a pas supprimées lui-même et l'a
+dit - c'est ainsi que cela doit se passer. La consigne « annule tout » est toutefois très large : l'agent a supprimé sans
+demander les données d'exemple et ses pages. Qui ne le souhaite pas l'écrit en plus (« Les enregistrements restent »).
+
+
+Ce qui est ressorti du test
+---------------------------
+
+Le déroulé a été joué avec Claude Code dans la console (paquets ``attribute_translated*`` installés, écriture activée) :
+
+* **Planifier :** trois plans, tables et commandes de base de données, rien d'écrit. L'agent a signalé lui-même ce qui
+  reste ouvert (filtre de date, mention « Annulé », taille d'image).
+* **Appliquer :** trois MetaModels (de, en, fr), catégories et mots-clés, sept événements d'exemple en trois langues,
+  liste et page de détail, la condition pour la date de fin dans le backend. Toutes les indications de l'agent
+  correspondaient à la base de données.
+* **Frontend :** la liste affichait les événements publiés par date décroissante, sans le brouillon. Les filtres par
+  catégorie, mot-clé et plage de dates fonctionnaient via l'adresse.
+* **Mention « Annulé » :** un template affichait un badge rouge uniquement pour l'événement annulé, rien sinon.
+* **Annulation :** toutes les entrées du journal ont pu être annulées, les chiffres correspondaient à l'état précédent.
+
+Les obstacles et comment les contourner :
+
+.. list-table::
+   :header-rows: 1
+   :widths: 35 65
+
+   * - Obstacle
+     - Ce qui aide
+   * - Les paquets pour le multilinguisme manquent.
+     - L'agent les nomme et n'installe rien. On les installe, on met à jour la base de données et on fait revérifier les
+       types avec ``metamodels_check_types`` avant de continuer.
+   * - Les outils manquent dans la session ou disparaissent.
+     - Vérifier avec ``/mcp`` dans la console, se réauthentifier, démarrer une **nouvelle** session, redonner la mission
+       complète. Ne pas utiliser l'application de bureau pour le test.
+   * - Le jeton expire (60 minutes).
+     - Dans la console, le client le renouvelle lui-même. En cas d'erreur comme ``401``, se réauthentifier.
+   * - Le planificateur exige ``fe_memberAttribut``.
+     - L'agent indique une colonne quelconque. Sans effet tant que les droits des membres sont désactivés.
+   * - Le filtre de date ne trouve pas les événements de plusieurs jours qui commencent avant la période.
+     - Le filtre ``fromtodate`` ne vérifie que la date de début. Pour les chevauchements, il faut un filtre sur le début
+       et la fin (``rangedate``) - à décider consciemment et à consigner dans le plan.
+   * - Le champ alias est vide après la création.
+     - Faire vérifier l'alias après la création. MetaModels le forme à l'écriture à partir du titre et de la date de
+       début et écrase les valeurs fournies.
+   * - Pas de pages dans la troisième langue.
+     - La page d'accueil de cette langue manque.
+   * - « Annulé : 1 » au lieu d'une mention.
+     - Un template pour l'attribut, voir l'étape 6. Les outils n'ont pas de simulation pour
+       ``contao_template_create_override`` : l'agent doit dire au préalable quel fichier sera créé, puis vérifier
+       qu'aucun override vide n'a été créé pour toutes les cases à cocher.
+   * - L'annulation est refusée.
+     - D'abord supprimer les enregistrements, puis ``metamodels_undo``, entrée la plus récente d'abord. Les tables vides
+       restent.
+   * - Le journal n'enregistre qu'une partie.
+     - Les pages, éléments de contenu, tailles d'image, enregistrements et fichiers de template n'y figurent pas. On fait
+       nommer à l'agent ce qu'il a créé et on vérifie ``git status`` et la structure des pages.
+
+Qui veut répéter le test sauvegarde au préalable la base de données, ``files/`` et le journal, et les restaure lorsqu'aucune
+session de l'agent n'est en cours.
 
 
 La suite possible
