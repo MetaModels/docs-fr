@@ -1,7 +1,7 @@
 .. _rst_cookbook_mcp_event-management:
 
-Gestion d'événements avec un agent IA
-=====================================
+Créer une gestion d'événements avec un agent IA
+===============================================
 
 **État : 03.11.2026**
 

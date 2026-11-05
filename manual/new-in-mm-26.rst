@@ -26,7 +26,7 @@ Les principales nouvelles fonctionnalités sont :
 * **API et MCP pour agents IA** : les enregistrements des MetaModels sont accessibles via la Contao-API (lire, créer,
   modifier, supprimer - avec les droits et la validation du backend), voir :ref:`Contao-API <rst_extended_contao-api>`.
   Via le serveur MCP de Contao, un agent IA peut aussi consulter et configurer MetaModels, voir
-  :ref:`Administration MCP <rst_extended_mcp-admin>`.
+  :ref:`Administration MCP <rst_extended_mcp-admin>` ou :ref:`rst_cookbook_mcp_event-management`
 * **Blocs dans les templates wrapper** : les templates ``mm_filter_default``, ``mm_clearall_default`` et
   ``mm_pagination`` sont divisés en blocs Twig (depuis MetaModels 2.5.2, également inclus dans 2.6). Un template
   personnalisé étend le template par défaut et ne surcharge que le bloc souhaité, voir
