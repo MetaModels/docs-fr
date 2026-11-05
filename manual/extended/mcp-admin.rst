@@ -134,8 +134,8 @@ L'administration MCP complète le serveur de Contao par les éléments suivants 
      - Les réglages que connaît un type : saisie, règles, valeurs par défaut, valeurs de sélection et libellés.
    * - ``metamodels_search_catalog``
      - Outil
-     - Trouve des types, des extensions et des pages du manuel pour une tâche, à partir de quelques mots dans
-       n'importe quelle langue.
+     - Trouve des types, des extensions et des pages du manuel pour une tâche, à partir de quelques mots. La langue des mots est indiquée dans
+       le paramètre ``language`` (par défaut ``en``).
    * - ``metamodels_list``
      - Outil
      - Tous les MetaModels avec table, langues et nombre d'attributs, de masques de saisie, de réglages de rendu et de
@@ -326,10 +326,18 @@ types d'attribut et de filtre proviennent donc d'un fichier de métadonnées du 
 `MetaModels/mcp-metadata <https://github.com/MetaModels/mcp-metadata>`_ :
 
 * par paquet : s'il est librement disponible ou dans le programme early adopter, où l'on obtient l'accès, une brève
-  description, des mots-clés et la page dans le manuel,
-* par type : le paquet, une brève description, des mots-clés dans les langues des utilisateurs et la page du manuel,
+  description, des mots-clés (par langue) et la page dans le manuel,
+* par type : le paquet, une brève description, des mots-clés par langue et la page du manuel,
 * par article : une page du manuel sur un thème ou une recette du cookbook avec titre, chemin et mots-clés
   - uniquement un renvoi, le texte reste dans le manuel.
+
+Les mots-clés figurent dans une liste distincte par langue, ``en`` est obligatoire, chaque liste compte au plus 12 entrées ::
+
+    "keywords": {"en": ["date", "time"], "de": ["datum", "uhrzeit", "termin"]}
+
+Les listes ne sont volontairement pas mélangées, car un mot peut avoir un sens différent selon la langue. Lors de la
+recherche, les mots-clés de la langue indiquée comptent pleinement, les mots-clés anglais comptent comme repli avec un demi-poids ;
+les mots-clés des autres langues ne sont pas consultés. L'ancien tableau plat n'est plus lu.
 
 Le fichier est publié sous ``https://metamodels.github.io/mcp-metadata/metadata.json``. L'extension le récupère de là
 (uniquement via https), le conserve un jour et mémorise la dernière version valide. Si le serveur n'est pas
